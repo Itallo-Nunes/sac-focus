@@ -1,0 +1,28 @@
+body {
+    font-family: sans-serif;
+}
+
+nav {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f2f2f2;
+    padding: 1rem;
+}
+
+.flashes {
+    list-style: none;
+    padding: 0;
+}
+
+.flashes li {
+    background-color: #e6f7ff;
+    border: 1px solid #91d5ff;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}

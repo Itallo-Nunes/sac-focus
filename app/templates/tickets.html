@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Meus Tickets de Suporte</h1>
+
+    <h2>Criar Novo Ticket</h2>
+    <form method="post">
+        <label for="title">Título:</label>
+        <input type="text" id="title" name="title">
+        <label for="content">Conteúdo:</label>
+        <textarea id="content" name="content"></textarea>
+        <button type="submit">Criar</button>
+    </form>
+
+    <h2>Tickets Abertos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Data de Postagem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.title }}</td>
+                    <td>{{ ticket.date_posted.strftime('%d-%m-%Y') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

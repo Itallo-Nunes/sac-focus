@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Chatbot</h1>
+    <div id="chat-history">
+        {% if response %}
+            <p><strong>Chatbot:</strong> {{ response }}</p>
+        {% endif %}
+    </div>
+    <form method="post">
+        <input type="text" name="message" placeholder="Digite sua mensagem...">
+        <button type="submit">Enviar</button>
+    </form>
+{% endblock %}
