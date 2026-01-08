@@ -1,3 +1,4 @@
+
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
@@ -6,7 +7,7 @@ from app import db
 
 attendant_bp = Blueprint('attendant', __name__, url_prefix='/atendente')
 
-# Decorator to check if the user is an attendant
+# Decorator para verificar se o usuário é um atendente
 def attendant_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -23,29 +24,39 @@ def dashboard():
     tickets = Ticket.query.order_by(Ticket.created_at.desc()).all()
     return render_template('attendant_dashboard.html', tickets=tickets)
 
-@attendant_bp.route('/ticket/<int:ticket_id>', methods=['GET', 'POST'])
+@attendant_bp.route('/ticket/<int:ticket_id>')
 @login_required
 @attendant_required
 def view_ticket(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
+    comments = Comment.query.filter_by(ticket_id=ticket.id).order_by(Comment.created_at.asc()).all()
+    return render_template('attendant_ticket_detail.html', ticket=ticket, comments=comments)
 
-    if request.method == 'POST':
-        if 'status' in request.form:
-            new_status = request.form.get('status')
-            if new_status and new_status != ticket.status:
-                ticket.status = new_status
-                db.session.commit()
-                flash(f'O status do ticket #{ticket.id} foi atualizado para {new_status}.', 'success')
-        
-        if 'comment_text' in request.form:
-            comment_text = request.form.get('comment_text')
-            if comment_text:
-                new_comment = Comment(text=comment_text, user_id=current_user.id, ticket_id=ticket.id)
-                db.session.add(new_comment)
-                db.session.commit()
-                flash('Seu comentário foi adicionado.', 'success')
+@attendant_bp.route('/ticket/<int:ticket_id>/respond', methods=['POST'])
+@login_required
+@attendant_required
+def post_response(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+    
+    response_text = request.form.get('response')
+    new_status = request.form.get('status')
 
+    if not response_text:
+        flash('A resposta não pode estar em branco.', 'danger')
         return redirect(url_for('attendant.view_ticket', ticket_id=ticket.id))
 
-    comments = Comment.query.filter_by(ticket_id=ticket.id).order_by(Comment.created_at.asc()).all()
-    return render_template('ticket_detail.html', ticket=ticket, comments=comments)
+    new_comment = Comment(
+        text=response_text, 
+        ticket_id=ticket.id, 
+        user_id=current_user.id # CORRIGIDO: de author_id para user_id
+    )
+    db.session.add(new_comment)
+
+    if new_status and new_status != ticket.status:
+        ticket.status = new_status
+
+    db.session.commit()
+    flash('Sua resposta foi enviada com sucesso.', 'success')
+
+    return redirect(url_for('attendant.view_ticket', ticket_id=ticket.id))
+
