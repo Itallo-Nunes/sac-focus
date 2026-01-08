@@ -31,6 +31,7 @@
                                 <tr>
                                     <th scope="row">#{{ ticket.id }}</th>
                                     <td>{{ ticket.title }}</td>
+                                    {# CORRIGIDO: Usamos ticket.requester.email para acessar o email do cliente #}
                                     <td>{{ ticket.requester.email }}</td>
                                     <td>
                                         <span class="badge rounded-pill 
