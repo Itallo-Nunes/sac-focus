@@ -1,37 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Suporte ao Cliente</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SAC Focus{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('main.index') }}">Início</a>
-        {% if 'username' in session %}
-            <a href="{{ url_for('tickets.index') }}">Tickets</a>
-            <a href="{{ url_for('chatbot.index') }}">Chatbot</a>
-            {% if session['username'] == 'admin' %}
-                <a href="{{ url_for('admin.index') }}">Admin</a>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="{{ url_for('main.index') }}">SAC Focus</a>
+            </div>
+            <div class="nav-links">
+                <ul>
+                    <li><a href="{{ url_for('main.index') }}">Início</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('tickets.create_ticket') }}">Criar Ticket</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        {% if current_user.is_admin %}
+                            <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Registrar</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="flash-{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
             {% endif %}
-            <a href="{{ url_for('auth.logout') }}">Sair</a>
-        {% else %}
-            <a href="{{ url_for('auth.login') }}">Entrar</a>
-            <a href="{{ url_for('auth.register') }}">Registrar</a>
-        {% endif %}
-    </nav>
+        {% endwith %}
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    <footer>
+        <p>&copy; 2024 SAC Focus. Todos os direitos reservados.</p>
+    </footer>
 
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
