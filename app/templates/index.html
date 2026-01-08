@@ -1,6 +1,76 @@
 {% extends 'base.html' %}
 
+{% block title %}Página Inicial{% endblock %}
+
 {% block content %}
-    <h1>Bem-vindo ao nosso portal de suporte ao cliente</h1>
-    <p>Use o chatbot para obter respostas rápidas ou crie um ticket para obter assistência de nossa equipe de suporte.</p>
+    {% if current_user.is_authenticated %}
+        {# --- VISÃO DO USUÁRIO LOGADO --- #}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">Bem-vindo, {{ current_user.email }}!</h1>
+        </div>
+
+        {% if current_user.is_attendant %}
+            <div class="p-5 mb-4 bg-light rounded-3">
+                <div class="container-fluid py-5">
+                    <h1 class="display-5 fw-bold">Painel do Atendente</h1>
+                    <p class="col-md-8 fs-4">Você está no modo de atendente. Acesse o painel para visualizar e gerenciar todos os chamados de suporte.</p>
+                    <a href="{{ url_for('attendant.dashboard') }}" class="btn btn-primary btn-lg">Ir para o Dashboard <i class="bi bi-arrow-right-circle"></i></a>
+                </div>
+            </div>
+        {% else %}
+             {# --- DASHBOARD DO CLIENTE --- #}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3">Seus Chamados Recentes</h2>
+                <a href="{{ url_for('tickets.create_ticket') }}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Novo Chamado
+                </a>
+            </div>
+
+            {% if tickets %}
+                <div class="list-group">
+                    {% for ticket in tickets %}
+                        <a href="{{ url_for('tickets.view_ticket', ticket_id=ticket.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ ticket.title }}</h5>
+                                <small class="text-muted">{{ ticket.created_at.strftime('%d/%m/%Y') }}</small>
+                            </div>
+                            <p class="mb-1">
+                                Status: 
+                                <span class="badge rounded-pill 
+                                    {% if ticket.status == 'Aberto' %} bg-success
+                                    {% elif ticket.status == 'Em andamento' %} bg-warning text-dark
+                                    {% elif ticket.status == 'Resolvido' %} bg-info text-dark
+                                    {% else %} bg-secondary
+                                    {% endif %}">{{ ticket.status }}</span>
+                                | Prioridade: {{ ticket.priority }}
+                            </p>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center p-5 border rounded">
+                    <h4>Nenhum chamado encontrado.</h4>
+                    <p>Parece que você ainda não abriu nenhum chamado de suporte.</p>
+                    <a href="{{ url_for('tickets.create_ticket') }}" class="btn btn-primary mt-3">Criar meu primeiro chamado</a>
+                </div>
+            {% endif %}
+        {% endif %}
+
+    {% else %}
+        {# --- VISÃO DO VISITANTE --- #}
+        <div class="p-5 mb-4 bg-light rounded-3 text-center">
+            <div class="container-fluid py-5">
+                <h1 class="display-4 fw-bold">Bem-vindo ao SACFocus</h1>
+                <p class="fs-4">A solução inteligente para seus chamados de suporte.</p>
+                <p>Faça login para gerenciar seus tickets ou crie uma conta para começar.</p>
+                <a class="btn btn-primary btn-lg mt-3" href="{{ url_for('auth.register') }}">Comece Agora</a>
+                <a class="btn btn-secondary btn-lg mt-3" href="{{ url_for('auth.login') }}">Já tenho uma conta</a>
+            </div>
+        </div>
+    {% endif %}
+
+    {# O chatbot será renderizado aqui, conforme o static/js/chatbot.js #}
+    {% if not current_user.is_authenticated or not current_user.is_attendant %}
+        <div id="chatbot-container"></div>
+    {% endif %}
 {% endblock %}

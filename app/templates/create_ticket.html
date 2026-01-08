@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Abrir Novo Chamado{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Abrir Novo Chamado</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" required placeholder="Ex: Problema com a fatura">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" required placeholder="Descreva seu problema em detalhes..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Prioridade</label>
+                        <select class="form-select" id="priority" name="priority">
+                            <option value="Baixa" selected>Baixa</option>
+                            <option value="Média">Média</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Enviar Chamado</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

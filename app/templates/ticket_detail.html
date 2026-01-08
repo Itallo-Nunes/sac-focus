@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Card Principal do Ticket -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Ticket #{{ ticket.id }}: {{ ticket.title }}</h4>
+                <span class="badge rounded-pill 
+                    {% if ticket.status == 'Aberto' %} bg-success
+                    {% elif ticket.status == 'Em andamento' %} bg-warning text-dark
+                    {% elif ticket.status == 'Resolvido' %} bg-info text-dark
+                    {% else %} bg-secondary
+                    {% endif %}">{{ ticket.status }}</span>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ ticket.description | nl2br }}</p>
+            </div>
+            <div class="card-footer text-muted">
+                Criado em {{ ticket.created_at.strftime('%d/%m/%Y às %H:%M') }} por {{ ticket.requester.email }}
+            </div>
+        </div>
+
+        <!-- Seção de Comentários -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Comentários</h5>
+            </div>
+            <div class="card-body">
+                {% if comments %}
+                    {% for comment in comments %}
+                        <div class="d-flex mb-3 {% if comment.author.is_attendant %} flex-row-reverse {% endif %}">
+                            <div class="w-100">
+                                <div class="d-flex justify-content-between">
+                                    <small class="fw-bold">{{ comment.author.email }}</small>
+                                    <small class="text-muted">{{ comment.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                </div>
+                                <div class="p-2 rounded {% if comment.author.is_attendant %} bg-primary bg-opacity-10 {% else %} bg-light {% endif %}">
+                                    {{ comment.text | nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted">Ainda não há comentários neste ticket.</p>
+                {% endif %}
+            </div>
+            {% if ticket.status != 'Fechado' %}
+                <div class="card-footer">
+                    <h6 class="mb-2">Adicionar Comentário</h6>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <textarea name="comment_text" rows="4" class="form-control" required placeholder="Digite seu comentário..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar Comentário</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Ações e Informações Adicionais -->
+        {% if not current_user.is_attendant and ticket.status == 'Resolvido' and not ticket.evaluation %}
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Problema Resolvido?</h5>
+                    <p>Ajude-nos a melhorar! Avalie o atendimento recebido para este ticket.</p>
+                    <a href="{{ url_for('tickets.evaluate_ticket', ticket_id=ticket.id) }}" class="btn btn-light">Avaliar Atendimento</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Detalhes do Ticket -->
+        <div class="card mb-3">
+            <div class="card-header"><h5 class="mb-0">Detalhes</h5></div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Prioridade:</strong> {{ ticket.priority }}</li>
+                <li class="list-group-item"><strong>Cliente:</strong> {{ ticket.requester.email }}</li>
+            </ul>
+        </div>
+
+        <!-- Ações do Atendente -->
+        {% if current_user.is_attendant %}
+            <div class="card mb-3">
+                <div class="card-header"><h5 class="mb-0">Ações</h5></div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Alterar Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="Aberto" {% if ticket.status == 'Aberto' %}selected{% endif %}>Aberto</option>
+                                <option value="Em andamento" {% if ticket.status == 'Em andamento' %}selected{% endif %}>Em andamento</option>
+                                <option value="Resolvido" {% if ticket.status == 'Resolvido' %}selected{% endif %}>Resolvido</option>
+                                <option value="Fechado" {% if ticket.status == 'Fechado' %}selected{% endif %}>Fechado</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Atualizar Status</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Avaliação -->
+        {% if ticket.evaluation %}
+            <div class="card mb-3">
+                <div class="card-header"><h5 class="mb-0">Avaliação do Cliente</h5></div>
+                <div class="card-body text-center">
+                    <h2 class="display-4 text-warning"> 
+                        {% for i in range(ticket.evaluation.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                        {% for i in range(5 - ticket.evaluation.rating) %}<i class="bi bi-star"></i>{% endfor %}
+                    </h2>
+                    {% if ticket.evaluation.comment %}
+                        <p class="fst-italic mt-2">"{{ ticket.evaluation.comment }}"</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

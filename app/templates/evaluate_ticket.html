@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Avaliar Atendimento - Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-2">Avaliar Atendimento</h2>
+                <p class="text-center text-muted mb-4">Ticket #{{ ticket.id }}: "{{ ticket.title }}"</p>
+
+                <form method="POST">
+                    <div class="mb-4 text-center">
+                        <label class="form-label d-block">Sua Nota (de 1 a 5)</label>
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" title="5 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 estrela"><i class="bi bi-star-fill"></i></label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Deixe um comentário (opcional)</label>
+                        <textarea name="comment" id="comment" rows="4" class="form-control" placeholder="Como foi sua experiência?"></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Enviar Avaliação e Fechar Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilo para as estrelas de avaliação */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    font-size: 2.5em;
+}
+.star-rating input[type="radio"] {
+    display: none;
+}
+.star-rating label {
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.star-rating:not(:hover) input[type="radio"]:checked ~ label,
+.star-rating:hover input[type="radio"]:hover ~ label,
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover ~ label {
+    color: #ffc107; /* Amarelo do Bootstrap */
+}
+</style>
+{% endblock %}
