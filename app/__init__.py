@@ -25,6 +25,8 @@ def create_app():
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
+    login_manager.login_message = u"Por favor, faça o login para acessar esta página."
+    login_manager.login_message_category = "info"
     login_manager.init_app(app)
 
     from .models import User
