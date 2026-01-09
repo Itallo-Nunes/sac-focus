@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Cabeçalho do Ticket -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+            <h1 class="h2 me-3">Ticket #{{ ticket.id }}: {{ ticket.title }}</h1>
+            <span class="badge rounded-pill fs-6
+                {% if ticket.status == 'Aberto' %} bg-success
+                {% elif ticket.status == 'Em andamento' %} bg-warning text-dark
+                {% elif ticket.status == 'Resolvido' %} bg-info text-dark
+                {% elif ticket.status == 'Fechado' %} bg-secondary
+                {% else %} bg-dark
+                {% endif %}">{{ ticket.status }}
+            </span>
+        </div>
+
+        <!-- Card com a Descrição Original -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <p class="card-text">{{ ticket.description|safe }}</p>
+            </div>
+            <div class="card-footer text-muted small">
+                Aberto em {{ ticket.created_at.strftime('%d/%m/%Y às %H:%M') }}
+            </div>
+        </div>
+
+        <!-- Seção de Ações do Cliente -->
+        {% if ticket.status == 'Resolvido' %}
+        <div class="card bg-light border-primary shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h5 class="card-title">Atendimento Concluído</h5>
+                <p>Este chamado foi marcado como resolvido pelo nosso time. Se você estiver satisfeito com a solução, por favor, finalize o atendimento com sua avaliação.</p>
+                <a href="{{ url_for('tickets.evaluate', ticket_id=ticket.id) }}" class="btn btn-primary btn-lg">Avaliar e Fechar Ticket</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Histórico de Comentários -->
+        <h3 class="h4 mb-3">Histórico de Comunicação</h3>
+        {% if comments %}
+            {% for comment in comments %}
+                {# CORRIGIDO: Usamos a relação comment.author.is_attendant para verificar se o autor é um atendente #}
+                <div class="card mb-3 {% if comment.author.is_attendant %}border-success{% endif %}">
+                    <div class="card-body {% if comment.author.is_attendant %}bg-success-light{% endif %}">
+                        <p>{{ comment.text|safe }}</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center small text-muted">
+                        <span>
+                            Postado por: <strong>{{ comment.author.email }}</strong> 
+                            {# CORRIGIDO: Mesma lógica para exibir o badge #}
+                            {% if comment.author.is_attendant %}
+                                <span class="badge bg-success">Atendente</span>
+                            {% endif %}
+                        </span>
+                        <span>{{ comment.created_at.strftime('%d/%m/%Y às %H:%M') }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center p-4 border rounded">
+                <p>Nenhuma resposta ou comentário foi adicionado a este ticket ainda.</p>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.bg-success-light {
+    background-color: #e6f9f0;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Ticket #{{ ticket.id }} {% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Coluna Principal: Ticket e Comentários -->
+    <div class="col-lg-8">
+        <!-- Detalhes do Ticket -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ ticket.title }}</h4>
+                <span class="badge rounded-pill 
+                    {% if ticket.status == 'Aberto' %} bg-success
+                    {% elif ticket.status == 'Em andamento' %} bg-warning text-dark
+                    {% elif ticket.status == 'Resolvido' %} bg-info text-dark
+                    {% else %} bg-secondary
+                    {% endif %}">{{ ticket.status }}
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ ticket.description }}</p>
+            </div>
+            <div class="card-footer text-muted small">
+                Aberto por: {{ ticket.requester.email }} em {{ ticket.created_at.strftime('%d/%m/%Y às %H:%M') }}
+            </div>
+        </div>
+
+        <!-- Comentários/Histórico -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Histórico de Respostas</h5>
+            </div>
+            <div class="card-body">
+                {% if comments %}
+                    {% for comment in comments %}
+                        <div class="mb-3 p-3 rounded {% if comment.is_attendant_response %}bg-light{% else %}border{% endif %}">
+                            <p class="mb-1">{{ comment.text }}</p>
+                            <small class="text-muted">
+                                Postado por: <strong>{{ comment.author.email }}</strong> em {{ comment.timestamp.strftime('%d/%m/%Y às %H:%M') }}
+                            </small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Nenhuma resposta ainda.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna Lateral: Ações e Informações -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Gerenciar Ticket</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('attendant.post_response', ticket_id=ticket.id) }}">
+                    <div class="mb-3">
+                        <label for="response" class="form-label"><strong>Adicionar Resposta</strong></label>
+                        <textarea class="form-control" id="response" name="response" rows="5" required placeholder="Digite sua resposta para o cliente aqui..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label"><strong>Atualizar Status</strong></label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="Aberto" {% if ticket.status == 'Aberto' %}selected{% endif %}>Aberto</option>
+                            <option value="Em andamento" {% if ticket.status == 'Em andamento' %}selected{% endif %}>Em andamento</option>
+                            <option value="Resolvido" {% if ticket.status == 'Resolvido' %}selected{% endif %}>Resolvido</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Enviar Resposta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

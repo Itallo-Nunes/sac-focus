@@ -1,12 +1,31 @@
 {% extends 'base.html' %}
 
+{% block title %}Entrar{% endblock %}
+
 {% block content %}
-    <h1>Entrar</h1>
-    <form method="post">
-        <label for="username">Nome de Usuário:</label>
-        <input type="text" id="username" name="username">
-        <label for="password">Senha:</label>
-        <input type="password" id="password" name="password">
-        <button type="submit">Entrar</button>
-    </form>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Login</h2>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Não tem uma conta? <a href="{{ url_for('auth.register') }}">Crie uma agora</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
