@@ -30,8 +30,9 @@ else:
             {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
         ]
         
+        # CORREÇÃO: Usa o nome de modelo estável para evitar conflito de recursos.
         model = genai.GenerativeModel(
-            model_name="gemini-pro",
+            model_name="gemini-1.0-pro",
             generation_config=generation_config,
             safety_settings=safety_settings
         )
@@ -71,10 +72,9 @@ def get_chatbot_response_ai(user_id, message):
         response = chat_session.send_message(contextual_prompt)
         return response.text
     except Exception as e:
-        # RE-REATIVANDO DEBUG: Retorna o erro real da API para o frontend
-        error_message = f"Erro de Diagnóstico FINAL da IA: {e}"
-        print(f"\033[91m{error_message}\033[0m")
-        return error_message
+        # RESTAURAÇÃO FINAL: Volta para a mensagem de erro genérica.
+        print(f"\033[91mErro ao se comunicar com a API do Gemini: {e}\033[0m")
+        return "Desculpe, ocorreu um erro ao processar sua solicitação. Tente mais tarde."
 
 
 @chatbot_bp.route('/ask', methods=['POST'])
