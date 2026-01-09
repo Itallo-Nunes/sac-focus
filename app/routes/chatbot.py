@@ -1,6 +1,6 @@
 import os
 import google.generativeai as genai
-from flask import Blueprint, request, jsonify, render_template # Adicionado render_template
+from flask import Blueprint, request, jsonify, render_template
 from flask_login import current_user
 from dotenv import load_dotenv
 
@@ -56,7 +56,6 @@ chat_histories = {}
 
 def get_chatbot_response_ai(user_id, message):
     """Obtém uma resposta do modelo de IA mantendo o histórico."""
-    # A verificação principal de `model` é feita na rota agora.
     if user_id not in chat_histories:
         chat_histories[user_id] = model.start_chat(history=[])
     
@@ -74,28 +73,27 @@ def get_chatbot_response_ai(user_id, message):
         response = chat_session.send_message(contextual_prompt)
         return response.text
     except Exception as e:
-        print(f"\033[91mErro ao se comunicar com a API do Gemini: {e}\033[0m")
-        return "Desculpe, ocorreu um erro ao processar sua solicitação. Tente mais tarde."
+        # MODIFICAÇÃO PARA DEBUG: Retorna o erro real da API para o frontend
+        error_message = f"Erro de comunicação com a IA: {e}"
+        print(f"\033[91m{error_message}\033[0m")
+        return error_message
 
 
 @chatbot_bp.route('/ask', methods=['POST'])
 def ask():
     """Lida com as perguntas enviadas pelo chatbot no frontend."""
-    # 1. VERIFICAÇÃO DE SEGURANÇA E CONFIGURAÇÃO
     if not model or not API_KEY:
-        return jsonify({'answer': "Desculpe, o serviço de chatbot não está ativado no momento."}), 503 # Service Unavailable
+        return jsonify({'answer': "Desculpe, o serviço de chatbot não está ativado no momento."}), 503
 
-    # 2. IMPEDIR ATENDENTES DE USAR O CHATBOT
     if current_user.is_authenticated and current_user.is_attendant:
-        return jsonify({'answer': "A funcionalidade de chatbot não se aplica a atendentes."}), 403 # Forbidden
+        return jsonify({'answer': "A funcionalidade de chatbot não se aplica a atendentes."}), 403
 
     data = request.get_json()
     if not data or 'question' not in data:
-        return jsonify({'error': 'A pergunta (question) é obrigatória.'}), 400 # Bad Request
+        return jsonify({'error': 'A pergunta (question) é obrigatória.'}), 400
 
     user_message = data['question']
     
-    # 3. IDENTIFICAR O USUÁRIO (LOGADO OU ANÔNIMO)
     if current_user.is_authenticated:
         user_id = f"user_{current_user.id}"
     else:
