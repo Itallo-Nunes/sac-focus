@@ -1,16 +1,8 @@
 import os
 import google.generativeai as genai
-from importlib.metadata import version, PackageNotFoundError
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import current_user
 from dotenv import load_dotenv
-
-# --- Diagnóstico de Versão ---
-try:
-    lib_version = version("google-generativeai")
-    print(f"\033[94mINFO: Versão da biblioteca google-generativeai em uso: {lib_version}\033[0m")
-except PackageNotFoundError:
-    print("\033[91mERRO CRÍTICO: Biblioteca google-generativeai não encontrada no ambiente.\033[0m")
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -23,6 +15,7 @@ model = None
 
 if not API_KEY:
     print("\033[91mAviso: A variável de ambiente GEMINI_API_KEY não foi definida.\033[0m")
+    print("O chatbot ficará desativado até que a chave seja configurada.")
 else:
     try:
         genai.configure(api_key=API_KEY)
@@ -48,14 +41,19 @@ else:
         print(f"\033[91mErro Crítico ao configurar o modelo Generative AI: {e}\033[0m")
         model = None
 
+# Rota para renderizar a página do chatbot
 @chatbot_bp.route('/')
 def chat_page():
+    """Exibe a página de chat."""
     chatbot_enabled = model is not None and API_KEY
     return render_template('chatbot.html', chatbot_enabled=chatbot_enabled)
 
+
+# Dicionário em memória para históricos de chat
 chat_histories = {}
 
 def get_chatbot_response_ai(user_id, message):
+    """Obtém uma resposta do modelo de IA mantendo o histórico."""
     if user_id not in chat_histories:
         chat_histories[user_id] = model.start_chat(history=[])
     
@@ -73,14 +71,14 @@ def get_chatbot_response_ai(user_id, message):
         response = chat_session.send_message(contextual_prompt)
         return response.text
     except Exception as e:
-        # REATIVANDO DEBUG: Retorna o erro real da API para o frontend
-        error_message = f"Erro de Diagnóstico da IA: {e}"
-        print(f"\033[91m{error_message}\033[0m")
-        return error_message
+        # RESTAURAÇÃO: Volta para a mensagem de erro genérica
+        print(f"\033[91mErro ao se comunicar com a API do Gemini: {e}\033[0m")
+        return "Desculpe, ocorreu um erro ao processar sua solicitação. Tente mais tarde."
 
 
 @chatbot_bp.route('/ask', methods=['POST'])
 def ask():
+    """Lida com as perguntas enviadas pelo chatbot no frontend."""
     if not model or not API_KEY:
         return jsonify({'answer': "Desculpe, o serviço de chatbot não está ativado no momento."}), 503
 
