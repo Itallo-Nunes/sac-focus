@@ -30,8 +30,9 @@ else:
             {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
         ]
         
+        # CORREÇÃO: Alterado o nome do modelo para 'gemini-pro'
         model = genai.GenerativeModel(
-            model_name="gemini-1.0-pro",
+            model_name="gemini-pro",
             generation_config=generation_config,
             safety_settings=safety_settings
         )
@@ -39,14 +40,12 @@ else:
 
     except Exception as e:
         print(f"\033[91mErro Crítico ao configurar o modelo Generative AI: {e}\033[0m")
-        # Mantém o modelo como None para que as rotas possam lidar com a falha
         model = None
 
 # Rota para renderizar a página do chatbot
 @chatbot_bp.route('/')
 def chat_page():
     """Exibe a página de chat."""
-    # Verifica se o modelo está desativado para passar a informação ao template
     chatbot_enabled = model is not None and API_KEY
     return render_template('chatbot.html', chatbot_enabled=chatbot_enabled)
 
@@ -73,10 +72,9 @@ def get_chatbot_response_ai(user_id, message):
         response = chat_session.send_message(contextual_prompt)
         return response.text
     except Exception as e:
-        # MODIFICAÇÃO PARA DEBUG: Retorna o erro real da API para o frontend
-        error_message = f"Erro de comunicação com a IA: {e}"
-        print(f"\033[91m{error_message}\033[0m")
-        return error_message
+        # RESTAURAÇÃO: Volta para a mensagem de erro genérica
+        print(f"\033[91mErro ao se comunicar com a API do Gemini: {e}\033[0m")
+        return "Desculpe, ocorreu um erro ao processar sua solicitação. Tente mais tarde."
 
 
 @chatbot_bp.route('/ask', methods=['POST'])
