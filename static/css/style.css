@@ -102,3 +102,36 @@
     padding: 15px;
     margin: auto;
 }
+
+/* Estilos para Avaliação de Estrelas */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse; /* Faz as estrelas preencherem da direita para a esquerda */
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #ffd700; /* Cor de ouro para estrelas */
+    cursor: pointer;
+}
+
+.star-rating input[type="radio"] {
+    display: none; /* Esconde os botões de rádio reais */
+}
+
+.star-rating label {
+    transition: color 0.2s;
+}
+
+/* Quando o mouse passa sobre uma estrela, todas as estrelas à sua "direita" (na verdade, à esquerda no DOM) também mudam de cor */
+.star-rating:hover label {
+    color: #ffd700 !important;
+}
+
+/* As estrelas que vêm DEPOIS da estrela com hover ficam com a cor padrão */
+.star-rating label:hover ~ label {
+    color: #d3d3d3 !important; /* Cinza claro */
+}
+
+/* Estilo para a estrela selecionada (e as anteriores a ela) */
+.star-rating input[type="radio"]:checked ~ label {
+    color: #ffd700 !important;
+}
