@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from ..models import User
 from .. import db
 
@@ -61,3 +61,27 @@ def logout():
     logout_user()
     flash('Você foi desconectado.', 'info')
     return redirect(url_for('main.index'))
+
+@auth_bp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not check_password_hash(current_user.password, current_password):
+            flash('Sua senha atual está incorreta.', 'danger')
+            return redirect(url_for('auth.change_password'))
+
+        if new_password != confirm_password:
+            flash('A nova senha e a confirmação não correspondem.', 'danger')
+            return redirect(url_for('auth.change_password'))
+
+        current_user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+
+        flash('Sua senha foi alterada com sucesso!', 'success')
+        return redirect(url_for('main.index'))
+
+    return render_template('change_password.html')
