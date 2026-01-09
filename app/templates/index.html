@@ -62,7 +62,25 @@
             <div class="container-fluid py-5">
                 <h1 class="display-4 fw-bold">Bem-vindo ao SACFocus</h1>
                 <p class="fs-4">A solução inteligente para seus chamados de suporte.</p>
-                <p>Faça login para gerenciar seus tickets ou crie uma conta para começar.</p>
+
+                <!-- Seção de Avaliação -->
+                <div id="star-rating-container" class="mt-4">
+                    <div id="rating-system">
+                        <p class="fs-5 mb-2">Gostou da experiência inicial?</p>
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 estrelas"><i class="bi bi-star-fill"></i></label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 estrela"><i class="bi bi-star-fill"></i></label>
+                        </div>
+                    </div>
+                    <div id="thanks-for-rating" class="hidden">
+                        <p class="fs-5 text-success">Obrigado pelo seu feedback!</p>
+                    </div>
+                </div>
+
+                <p class="mt-4">Faça login para gerenciar seus tickets ou crie uma conta para começar.</p>
                 <a class="btn btn-primary btn-lg mt-3" href="{{ url_for('auth.register') }}">Comece Agora</a>
                 <a class="btn btn-secondary btn-lg mt-3" href="{{ url_for('auth.login') }}">Já tenho uma conta</a>
             </div>
