@@ -1,6 +1,6 @@
 import os
 import google.generativeai as genai
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template # Adicionado render_template
 from flask_login import current_user
 from dotenv import load_dotenv
 
@@ -41,6 +41,15 @@ else:
         print(f"\033[91mErro Crítico ao configurar o modelo Generative AI: {e}\033[0m")
         # Mantém o modelo como None para que as rotas possam lidar com a falha
         model = None
+
+# Rota para renderizar a página do chatbot
+@chatbot_bp.route('/')
+def chat_page():
+    """Exibe a página de chat."""
+    # Verifica se o modelo está desativado para passar a informação ao template
+    chatbot_enabled = model is not None and API_KEY
+    return render_template('chatbot.html', chatbot_enabled=chatbot_enabled)
+
 
 # Dicionário em memória para históricos de chat
 chat_histories = {}
