@@ -9,14 +9,10 @@ def create_app():
     app = Flask(__name__)
 
     # --- Configurações de Produção (Render) e Desenvolvimento ---
-    # Busca a SECRET_KEY do ambiente. Usa um valor padrão se não encontrar.
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-very-secret-key-for-dev')
 
-    # Busca a DATABASE_URL do ambiente (fornecida pelo Render).
-    # Se não encontrar, usa o banco de dados local SQLite.
     database_url = os.environ.get('DATABASE_URL')
     if database_url and database_url.startswith("postgres://"):
-        # CORREÇÃO: Usa o dialeto "postgresql+psycopg" para o SQLAlchemy.
         database_url = database_url.replace("postgres://", "postgresql+psycopg://", 1)
     
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///db.sqlite'
@@ -28,15 +24,17 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    # --- Registro de Blueprints ---
+    # --- Registro de Blueprints (CORRIGIDO) ---
     from .routes.main import main_bp
     from .routes.auth import auth_bp
-    from .routes.dashboard import dashboard_bp
+    # CORREÇÃO: Importa o blueprint correto do arquivo correto.
+    from .routes.attendant import attendant_bp 
     from .routes.chatbot import chatbot_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(dashboard_bp)
+    # CORREÇÃO: Registra o blueprint do atendente.
+    app.register_blueprint(attendant_bp)
     app.register_blueprint(chatbot_bp, url_prefix='/chat')
     
     # --- Carregamento do Usuário ---
