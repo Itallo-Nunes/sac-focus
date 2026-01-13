@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from urllib.parse import urlparse, urlunparse
 
 db = SQLAlchemy()
 
@@ -12,9 +13,18 @@ def create_app():
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-very-secret-key-for-dev')
 
     database_url = os.environ.get('DATABASE_URL')
-    if database_url and database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql+psycopg://", 1)
     
+    # SOLUÇÃO ROBUSTA para a URL do Banco de Dados em Produção
+    if database_url:
+        try:
+            url = urlparse(database_url)
+            # Se o esquema for 'postgres' ou 'postgresql', troca pelo dialeto correto.
+            if url.scheme in ['postgres', 'postgresql']:
+                new_url_tuple = url._replace(scheme='postgresql+psycopg')
+                database_url = urlunparse(new_url_tuple)
+        except Exception as e:
+            print(f"Aviso: Falha ao processar DATABASE_URL. Usando valor original. Erro: {e}")
+
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///db.sqlite'
 
     db.init_app(app)
@@ -24,16 +34,14 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    # --- Registro de Blueprints (CORRIGIDO) ---
+    # --- Registro de Blueprints ---
     from .routes.main import main_bp
     from .routes.auth import auth_bp
-    # CORREÇÃO: Importa o blueprint correto do arquivo correto.
     from .routes.attendant import attendant_bp 
     from .routes.chatbot import chatbot_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    # CORREÇÃO: Registra o blueprint do atendente.
     app.register_blueprint(attendant_bp)
     app.register_blueprint(chatbot_bp, url_prefix='/chat')
     
