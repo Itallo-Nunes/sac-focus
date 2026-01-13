@@ -31,8 +31,14 @@
                                 <tr>
                                     <th scope="row">#{{ ticket.id }}</th>
                                     <td>{{ ticket.title }}</td>
-                                    {# CORRIGIDO: Usamos ticket.requester.email para acessar o email do cliente #}
-                                    <td>{{ ticket.requester.email }}</td>
+                                    {# ADICIONADA VERIFICAÇÃO para evitar erro com tickets órfãos #}
+                                    <td>
+                                        {% if ticket.requester %}
+                                            {{ ticket.requester.email }}
+                                        {% else %}
+                                            <span class="text-muted">Usuário não encontrado</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <span class="badge rounded-pill 
                                             {% if ticket.status == 'Aberto' %} bg-success
