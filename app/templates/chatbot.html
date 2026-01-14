@@ -67,12 +67,12 @@
 
             try {
                 // Send message to the backend
-                const response = await fetch('{{ url_for("chatbot.chat") }}', {
+                const response = await fetch('{{ url_for("chatbot.ask") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: userMessage }),
+                    body: JSON.stringify({ question: userMessage }),
                 });
 
                 if (!response.ok) {
@@ -80,7 +80,7 @@
                 }
 
                 const data = await response.json();
-                const botMessage = data.response;
+                const botMessage = data.answer;
 
                 // Display bot response
                 appendMessage(botMessage, 'bot');

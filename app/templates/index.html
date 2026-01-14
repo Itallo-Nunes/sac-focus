@@ -60,11 +60,15 @@
         {# --- VISÃO DO VISITANTE --- #}
         <div class="p-5 mb-4 bg-light rounded-3 text-center">
             <div class="container-fluid py-5">
-                <h1 class="display-4 fw-bold">Bem-vindo ao SACFocus</h1>
+                <h1 class="display-4 fw-bold">Bem-vindo ao SAC Focus</h1>
                 <p class="fs-4">A solução inteligente para seus chamados de suporte.</p>
+                <p class="mt-4">Faça login para gerenciar seus tickets ou crie uma conta para começar.</p>
+                
+                <a class="btn btn-primary btn-lg mt-3" href="{{ url_for('auth.register') }}">Comece Agora</a>
+                <a class="btn btn-secondary btn-lg mt-3" href="{{ url_for('auth.login') }}">Já tenho uma conta</a>
 
-                <!-- Seção de Avaliação -->
-                <div id="star-rating-container" class="mt-4">
+                <!-- Seção de Avaliação movida para baixo -->
+                <div id="star-rating-container" class="mt-5 pt-4 border-top">
                     <div id="rating-system">
                         <p class="fs-5 mb-2">Gostou da experiência inicial?</p>
                         <div class="star-rating">
@@ -79,10 +83,6 @@
                         <p class="fs-5 text-success">Obrigado pelo seu feedback!</p>
                     </div>
                 </div>
-
-                <p class="mt-4">Faça login para gerenciar seus tickets ou crie uma conta para começar.</p>
-                <a class="btn btn-primary btn-lg mt-3" href="{{ url_for('auth.register') }}">Comece Agora</a>
-                <a class="btn btn-secondary btn-lg mt-3" href="{{ url_for('auth.login') }}">Já tenho uma conta</a>
             </div>
         </div>
     {% endif %}
