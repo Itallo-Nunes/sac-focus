@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from ..models import User
+from ..models import User, Ticket, Comment, Evaluation
 from .. import db
 
 auth_bp = Blueprint('auth', __name__)
@@ -21,7 +21,11 @@ def login():
 
         login_user(user, remember=remember)
         flash('Login realizado com sucesso!', 'success')
-        return redirect(url_for('main.index'))
+        
+        if user.is_attendant:
+            return redirect(url_for('attendant.dashboard'))
+        else:
+            return redirect(url_for('main.index'))
 
     return render_template('login.html')
 
@@ -85,3 +89,50 @@ def change_password():
         return redirect(url_for('main.index'))
 
     return render_template('change_password.html')
+
+@auth_bp.route('/confirm-delete', methods=['GET'])
+@login_required
+def confirm_delete():
+    """Exibe a página de confirmação para deletar a conta."""
+    return render_template('confirm_delete.html')
+
+@auth_bp.route('/delete-account', methods=['POST'])
+@login_required
+def delete_account():
+    """
+    Anonimiza os dados do usuário (tickets, comentários, avaliações)
+    e, em seguida, deleta a conta do usuário de forma atômica e segura.
+    """
+    user_to_delete = current_user
+
+    try:
+        # O bloco `no_autoflush` impede que o SQLAlchemy tente salvar
+        # alterações no banco de dados prematuramente enquanto iteramos
+        # sobre as relações do usuário. As alterações só serão enviadas
+        # com o `db.session.commit()` final.
+        with db.session.no_autoflush:
+            # Anonimiza os tickets, comentários e avaliações
+            for ticket in user_to_delete.tickets:
+                ticket.user_id = None
+            for comment in user_to_delete.comments:
+                comment.user_id = None
+            for evaluation in user_to_delete.evaluations:
+                evaluation.user_id = None
+
+            # Após anonimizar as referências, o usuário pode ser deletado
+            db.session.delete(user_to_delete)
+
+        # Agora, todas as alterações são salvas de uma vez (atomicamente)
+        db.session.commit()
+
+        logout_user()
+        flash('Sua conta foi removida com sucesso.', 'success')
+
+    except Exception as e:
+        # Se ocorrer qualquer erro, reverte todas as alterações
+        db.session.rollback()
+        # Log do erro seria ideal em um app de produção
+        print(f"Erro ao deletar conta: {e}")
+        flash('Ocorreu um erro inesperado ao remover sua conta. Tente novamente.', 'danger')
+
+    return redirect(url_for('main.index'))

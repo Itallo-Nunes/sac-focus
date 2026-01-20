@@ -1,7 +1,8 @@
 
 import os
 import json
-import google.genai as genai
+# CORREÇÃO FINAL: O nome do pacote a ser importado é google.generativeai
+import google.generativeai as genai
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import current_user
 from dotenv import load_dotenv
@@ -31,6 +32,7 @@ if not API_KEY:
     print("\033[91mAviso: A variável de ambiente GEMINI_API_KEY não foi definida.\033[0m")
 else:
     try:
+        # CORREÇÃO FINAL: Usar o configure, que é o correto para esta versão da lib
         genai.configure(api_key=API_KEY)
         model = genai.GenerativeModel('gemini-pro')
         print("\033[92mModelo Generative AI configurado com sucesso.\033[0m")
