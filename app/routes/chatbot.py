@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+import google.genai as genai
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import current_user
 from dotenv import load_dotenv
