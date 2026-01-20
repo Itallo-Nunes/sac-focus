@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Confirmar Exclusão da Conta{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-7">
+        <div class="card border-danger text-center">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">Atenção: Ação Irreversível</h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text fs-5 mt-3">Você tem <strong>certeza absoluta</strong> que deseja excluir sua conta?</p>
+                <p>Esta ação é <strong>permanente</strong> e não pode ser desfeita. Todos os seus tickets e comentários serão anonimizados, e você perderá o acesso à sua conta para sempre.</p>
+                
+                <!-- Formulário que REALMENTE executa a exclusão -->
+                <form method="POST" action="{{ url_for('auth.delete_account') }}" class="mt-4">
+                    <button type="submit" class="btn btn-danger btn-lg">Sim, Excluir Minha Conta Permanentemente</button>
+                    <a href="{{ url_for('auth.change_password') }}" class="btn btn-secondary btn-lg">Cancelar e Voltar</a>
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+                Pense com cuidado antes de prosseguir.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

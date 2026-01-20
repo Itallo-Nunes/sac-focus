@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket #{{ ticket.id }} - Visão do Atendente{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Coluna Principal: Detalhes e Comentários -->
+        <div class="col-lg-8">
+            <!-- Card de Detalhes do Ticket -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Ticket #{{ ticket.id }}: {{ ticket.title }}</h4>
+                    <span class="badge fs-6 bg-{{ 'success' if ticket.status == 'Fechado' or ticket.status == 'Resolvido' else 'warning' }}">
+                        {{ ticket.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p><strong>Cliente:</strong> {{ ticket.requester.name }} ({{ ticket.requester.email }})</p>
+                    <p><strong>Criado em:</strong> {{ ticket.created_at.strftime('%d/%m/%Y às %H:%M') }}</p>
+                    <p><strong>Prioridade:</strong> {{ ticket.priority }}</p>
+                    <hr>
+                    <p class="card-text">{{ ticket.description | nl2br }}</p>
+                </div>
+            </div>
+
+            <!-- Card de Comentários -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Comentários</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Formulário para adicionar novo comentário -->
+                    <form method="POST" action="{{ url_for('attendant.view_ticket', ticket_id=ticket.id) }}" novalidate>
+                        {{ comment_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ comment_form.text.label(class="form-label") }}
+                            {{ comment_form.text(class="form-control" + (" is-invalid" if comment_form.text.errors else ""), rows=4) }}
+                            {% for error in comment_form.text.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {{ comment_form.submit_comment(class="btn btn-primary") }}
+                    </form>
+
+                    <hr class="my-4">
+
+                    <!-- Lista de Comentários Existentes -->
+                    <h5>Histórico</h5>
+                    {% if comments %}
+                        {% for comment in comments %}
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-circle fs-3 text-muted"></i>
+                            </div>
+                            <div class="ms-3 w-100">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold">
+                                        {{ comment.author.name }} 
+                                        {% if comment.author.is_attendant %}
+                                            <span class="badge bg-info">Atendente</span>
+                                        {% endif %}
+                                    </span>
+                                    <small class="text-muted">{{ comment.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                </div>
+                                <p class="mt-1 mb-0">{{ comment.text | nl2br }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center text-muted">Nenhum comentário ainda. Seja o primeiro a responder!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Lateral: Ações -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h4>Ações</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Formulário para Mudar Status -->
+                    <form method="POST" action="{{ url_for('attendant.view_ticket', ticket_id=ticket.id) }}" novalidate>
+                        {{ status_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ status_form.status.label(class="form-label") }}
+                            {{ status_form.status(class="form-select") }}
+                        </div>
+                        {{ status_form.submit_status(class="btn btn-success w-100") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
