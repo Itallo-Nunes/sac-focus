@@ -1,9 +1,11 @@
 
 import os
+import re
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from urllib.parse import urlparse, urlunparse
+from markupsafe import Markup, escape
 
 db = SQLAlchemy()
 
@@ -15,17 +17,8 @@ def create_app():
 
     database_url = os.environ.get('DATABASE_URL')
     
-    # Solução robusta para a URL do Banco de Dados em Produção
-    if database_url:
-        try:
-            url = urlparse(database_url)
-            # Se o esquema for 'postgres' ou 'postgresql', troca pelo dialeto correto.
-            if url.scheme in ['postgres', 'postgresql']:
-                new_url_tuple = url._replace(scheme='postgresql+psycopg')
-                database_url = urlunparse(new_url_tuple)
-        except Exception as e:
-            # Em caso de erro, apenas loga um aviso e continua com a URL original
-            print(f"Aviso: Falha ao processar DATABASE_URL. Usando valor original. Erro: {e}")
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///db.sqlite'
 
@@ -36,18 +29,27 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
+    # --- FILTRO JINJA2 PERSONALIZADO (nl2br) ---
+    @app.template_filter('nl2br')
+    def nl2br_filter(s):
+        s = escape(s)
+        s = s.replace('\r\n', '\n').replace('\r', '\n')
+        paragraphs = s.split('\n\n')
+        paragraphs = ['<p>%s</p>' % p.replace('\n', '<br>') for p in paragraphs]
+        return Markup(''.join(paragraphs))
+
     # --- Registro de Blueprints ---
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.attendant import attendant_bp 
     from .routes.chatbot import chatbot_bp
-    from .routes.tickets import tickets_bp # <<< ADICIONADO
+    from .routes.tickets import tickets_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(attendant_bp)
     app.register_blueprint(chatbot_bp, url_prefix='/chat')
-    app.register_blueprint(tickets_bp, url_prefix='/tickets') # <<< ADICIONADO
+    app.register_blueprint(tickets_bp, url_prefix='/tickets')
     
     # --- Carregamento do Usuário ---
     from .models import User
@@ -56,4 +58,3 @@ def create_app():
         return User.query.get(int(user_id))
 
     return app
-

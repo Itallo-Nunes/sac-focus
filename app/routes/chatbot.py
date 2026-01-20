@@ -31,9 +31,8 @@ if not API_KEY:
     print("\033[91mAviso: A variável de ambiente GEMINI_API_KEY não foi definida.\033[0m")
 else:
     try:
-        # A chamada genai.configure() foi removida.
-        # A biblioteca encontrará a API_KEY automaticamente no ambiente.
-        model = genai.GenerativeModel(model_name="gemini-1.0-pro")
+        genai.configure(api_key=API_KEY)
+        model = genai.GenerativeModel('gemini-pro')
         print("\033[92mModelo Generative AI configurado com sucesso.\033[0m")
     except Exception as e:
         print(f"\033[91mErro Crítico ao configurar o modelo Generative AI: {e}\033[0m")

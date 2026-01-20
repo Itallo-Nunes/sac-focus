@@ -1,68 +1,54 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}Painel do Atendente{% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2">Painel do Atendente</h1>
-    </div>
+<div class="container mt-5">
+    <h1 class="mb-4">Painel de Controle do Atendente</h1>
+    <p>Bem-vindo, {{ current_user.email }}. Aqui estão todos os tickets de suporte.</p>
 
-    <div class="card shadow-sm">
+    <div class="card">
         <div class="card-header">
-            <h5 class="mb-0">Todos os Chamados</h5>
+            Todos os Tickets
         </div>
         <div class="card-body">
-            {% if tickets %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Título</th>
-                                <th scope="col">Cliente</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Prioridade</th>
-                                <th scope="col">Data</th>
-                                <th scope="col">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ticket in tickets %}
-                                <tr>
-                                    <th scope="row">#{{ ticket.id }}</th>
-                                    <td>{{ ticket.title }}</td>
-                                    {# ADICIONADA VERIFICAÇÃO para evitar erro com tickets órfãos #}
-                                    <td>
-                                        {% if ticket.requester %}
-                                            {{ ticket.requester.email }}
-                                        {% else %}
-                                            <span class="text-muted">Usuário não encontrado</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill 
-                                            {% if ticket.status == 'Aberto' %} bg-success
-                                            {% elif ticket.status == 'Em andamento' %} bg-warning text-dark
-                                            {% elif ticket.status == 'Resolvido' %} bg-info text-dark
-                                            {% else %} bg-secondary
-                                            {% endif %}">{{ ticket.status }}
-                                        </span>
-                                    </td>
-                                    <td>{{ ticket.priority }}</td>
-                                    <td>{{ ticket.created_at.strftime('%d/%m/%Y') }}</td>
-                                    <td>
-                                        <a href="{{ url_for('attendant.view_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-outline-primary">Ver Detalhes</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="text-center p-4">
-                    <p>Nenhum chamado no sistema. Bom trabalho!</p>
-                </div>
-            {% endif %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Criado em</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>{{ ticket.requester.email }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if ticket.status == 'fechado' else 'warning' }}">
+                                    {{ ticket.status.capitalize() }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('attendant.view_ticket', ticket_id=ticket.id) }}" class="btn btn-primary btn-sm">Ver</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhum ticket encontrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}
