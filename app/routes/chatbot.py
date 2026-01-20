@@ -31,7 +31,8 @@ if not API_KEY:
     print("\033[91mAviso: A variável de ambiente GEMINI_API_KEY não foi definida.\033[0m")
 else:
     try:
-        genai.configure(api_key=API_KEY)
+        # A chamada genai.configure() foi removida.
+        # A biblioteca encontrará a API_KEY automaticamente no ambiente.
         model = genai.GenerativeModel(model_name="gemini-1.0-pro")
         print("\033[92mModelo Generative AI configurado com sucesso.\033[0m")
     except Exception as e:
@@ -45,10 +46,7 @@ def find_in_faq(user_message):
     if not faq_data:
         return None
 
-    # Simplificando a busca: procura por correspondência de palavras-chave
-    # (Pode ser melhorado com bibliotecas de NLP no futuro)
     user_words = set(user_message.lower().split())
-    
     best_match = None
     max_match_count = 0
 
@@ -60,12 +58,10 @@ def find_in_faq(user_message):
             max_match_count = match_count
             best_match = item['resposta']
     
-    # Retorna a resposta se houver uma correspondência mínima de palavras
-    if max_match_count > 1: # Exige pelo menos 2 palavras em comum
+    if max_match_count > 1:
         return best_match
         
     return None
-
 
 # Dicionário em memória para históricos de chat
 chat_histories = {}
@@ -75,12 +71,10 @@ def get_chatbot_response(user_id, user_message):
     Obtém uma resposta para o usuário, primeiro consultando o FAQ
     e depois a IA Generativa se necessário.
     """
-    # 1. Tenta encontrar a resposta no FAQ primeiro
     faq_answer = find_in_faq(user_message)
     if faq_answer:
         return faq_answer
 
-    # 2. Se não encontrou no FAQ e o modelo de IA está disponível, usa a IA
     if not model:
         return "Desculpe, não encontrei uma resposta na nossa base de conhecimento e o serviço de IA não está disponível no momento."
 
@@ -131,7 +125,6 @@ def ask():
     if current_user.is_authenticated:
         user_id = f"user_{current_user.id}"
     else:
-        # Para usuários não autenticados, usa o ID da sessão do Flask
         user_id = f"session_{request.cookies.get('session', 'anonymous')}"
 
     bot_response = get_chatbot_response(user_id, user_message)
