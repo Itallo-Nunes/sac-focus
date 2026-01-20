@@ -1,0 +1,24 @@
+{
+  "perguntas": [
+    {
+      "pergunta": "Como posso redefinir minha senha?",
+      "resposta": "Para redefinir sua senha, clique em 'Login', depois em 'Esqueci minha senha' e siga as instruções enviadas para o seu e-mail."
+    },
+    {
+      "pergunta": "Qual o prazo para a resolução de um chamado?",
+      "resposta": "O prazo padrão para a primeira resposta é de 24 horas úteis. A resolução completa depende da complexidade do problema, mas nosso objetivo é resolver 80% dos chamados em até 3 dias úteis."
+    },
+    {
+      "pergunta": "Como acompanho o status do meu ticket?",
+      "resposta": "Você pode acompanhar o status de todos os seus chamados na página 'Meus Tickets' após fazer o login na sua conta."
+    },
+    {
+      "pergunta": "Vocês oferecem suporte por telefone?",
+      "resposta": "Atualmente, nosso suporte é 100% digital, focado em chamados (tickets) e através deste chatbot. Isso nos permite manter um registro detalhado e atender com mais eficiência."
+    },
+    {
+      "pergunta": "Como abrir um chamado?",
+      "resposta": "Para abrir um novo chamado, faça login na sua conta e clique no botão 'Abrir Chamado'. Descreva seu problema com o máximo de detalhes possível."
+    }
+  ]
+}
