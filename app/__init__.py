@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -40,11 +41,13 @@ def create_app():
     from .routes.auth import auth_bp
     from .routes.attendant import attendant_bp 
     from .routes.chatbot import chatbot_bp
+    from .routes.tickets import tickets_bp # <<< ADICIONADO
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(attendant_bp)
     app.register_blueprint(chatbot_bp, url_prefix='/chat')
+    app.register_blueprint(tickets_bp, url_prefix='/tickets') # <<< ADICIONADO
     
     # --- Carregamento do Usuário ---
     from .models import User
@@ -53,3 +56,4 @@ def create_app():
         return User.query.get(int(user_id))
 
     return app
+
