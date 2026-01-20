@@ -1,6 +1,6 @@
 {
   "inicio": {
-    "mensagem": "Olá! Sou o assistente virtual da SACFocus. Como posso ajudar?",
+    "mensagem": "Olá! Sou o assistente virtual da SAC Focus. Como posso ajudar?",
     "opcoes": [
       { "texto": "Dúvidas sobre a ferramenta", "proximo_no": "sobre_ferramenta" },
       { "texto": "Gerenciamento de chamados", "proximo_no": "sobre_chamados" },
@@ -31,5 +31,16 @@
       { "texto": "Alterar meu e-mail", "resposta": "A alteração de e-mail deve ser solicitada ao administrador do sistema para garantir a segurança." },
       { "texto": "Voltar", "proximo_no": "inicio" }
     ]
+  },
+  "algo_mais": {
+    "mensagem": "Posso ajudar com algo mais?",
+    "opcoes": [
+      { "texto": "Sim", "proximo_no": "inicio" },
+      { "texto": "Não", "proximo_no": "finalizar" }
+    ]
+  },
+  "finalizar": {
+    "mensagem": "Tudo bem! Se precisar de algo, é só chamar.",
+    "opcoes": []
   }
 }

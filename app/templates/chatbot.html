@@ -4,70 +4,24 @@
 
 {% block content %}
 <style>
-    .chat-window {
-        height: 400px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 1rem;
-        overflow-y: scroll;
-        margin-bottom: 1rem;
-        display: flex;
-        flex-direction: column;
-    }
-    .chat-message {
-        padding: 0.5rem 1rem;
-        border-radius: 15px;
-        margin-bottom: 0.5rem;
-        max-width: 70%;
-        word-wrap: break-word;
-    }
-    .user-message {
-        background-color: #0056b3;
-        color: white;
-        align-self: flex-end;
-    }
-    .bot-message {
-        background-color: #e9ecef;
-        color: #343a40;
-        align-self: flex-start;
-    }
-    #chat-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: flex-start;
-        margin-bottom: 1rem;
-    }
-    .option-button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 0.6rem 1rem;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .option-button:hover {
-        background-color: #0056b3;
-    }
-    #chat-form {
-        display: flex;
-        gap: 1rem;
-    }
-    #chat-input {
-        flex-grow: 1;
-    }
+    /* Estilos permanecem os mesmos */
+    .chat-window { height: 400px; border: 1px solid #ccc; border-radius: 8px; padding: 1rem; overflow-y: scroll; margin-bottom: 1rem; display: flex; flex-direction: column; }
+    .chat-message { padding: 0.5rem 1rem; border-radius: 15px; margin-bottom: 0.5rem; max-width: 70%; word-wrap: break-word; }
+    .user-message { background-color: #0056b3; color: white; align-self: flex-end; }
+    .bot-message { background-color: #e9ecef; color: #343a40; align-self: flex-start; }
+    #chat-options { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-start; margin-bottom: 1rem; }
+    .option-button { background-color: #007bff; color: white; border: none; padding: 0.6rem 1rem; border-radius: 20px; cursor: pointer; transition: background-color 0.2s; }
+    .option-button:hover { background-color: #0056b3; }
+    #chat-form { display: flex; gap: 1rem; }
+    #chat-input { flex-grow: 1; }
 </style>
 
 <h2>Assistente Virtual</h2>
 <p>Digite sua dúvida ou selecione uma das opções sugeridas.</p>
 
 <div id="chat-window" class="chat-window"></div>
-
-<!-- Container para os botões de sugestão -->
 <div id="chat-options"></div>
 
-<!-- Formulário de texto re-introduzido -->
 <form id="chat-form">
     <input type="text" id="chat-input" class="form-control" placeholder="Digite sua mensagem..." required autocomplete="off">
     <button type="submit" class="btn btn-primary">Enviar</button>
@@ -80,10 +34,8 @@
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
 
-        // Guarda o estado das opções do nó atual da conversa
         let currentNodeOptions = [];
 
-        // Adiciona uma mensagem na janela de chat
         function appendMessage(message, sender) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('chat-message', sender + '-message');
@@ -92,24 +44,22 @@
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
 
-        // Lida com a seleção de uma opção (seja por clique ou submissão do texto)
         function handleOptionSelection(option) {
             appendMessage(option.texto, 'user');
-            chatInput.value = ''; // Limpa o campo de texto
+            chatInput.value = '';
             
             if (option.resposta) {
+                // Exibe a resposta final...
                 appendMessage(option.resposta, 'bot');
-                // Após uma resposta final, volta ao início para um novo fluxo
-                loadNode('inicio');
+                // ...e em vez de reiniciar, agora chama o nó 'algo_mais'
+                loadNode('algo_mais'); 
             } else if (option.proximo_no) {
-                // Carrega o próximo passo da conversa
                 loadNode(option.proximo_no);
             }
         }
         
-        // Renderiza os botões de opção
         function displayOptions(options) {
-            chatOptionsContainer.innerHTML = ''; // Limpa opções antigas
+            chatOptionsContainer.innerHTML = '';
             options.forEach(option => {
                 const button = document.createElement('button');
                 button.classList.add('option-button');
@@ -121,7 +71,6 @@
             });
         }
 
-        // Carrega um nó da árvore de conversa
         async function loadNode(nodeId) {
             try {
                 const response = await fetch('{{ url_for("chatbot.flow") }}', {
@@ -152,7 +101,6 @@
             }
         }
 
-        // Filtra as opções visíveis conforme o usuário digita
         chatInput.addEventListener('input', () => {
             const inputText = chatInput.value.toLowerCase();
             if (!inputText) {
@@ -165,13 +113,11 @@
             displayOptions(filteredOptions);
         });
 
-        // Lida com a submissão do formulário (pressionando Enter ou clicando em Enviar)
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const inputText = chatInput.value;
             if (!inputText) return;
 
-            // Verifica se o texto digitado corresponde exatamente a uma das opções atuais
             const exactMatch = currentNodeOptions.find(opt => 
                 opt.texto.toLowerCase() === inputText.toLowerCase()
             );
@@ -179,14 +125,12 @@
             if (exactMatch) {
                 handleOptionSelection(exactMatch);
             } else {
-                // Se não houver correspondência exata, envia uma mensagem de ajuda
                 appendMessage(inputText, 'user');
                 appendMessage('Não entendi. Por favor, escolha uma das opções sugeridas.', 'bot');
-                displayOptions(currentNodeOptions); // Re-exibe as opções originais
+                displayOptions(currentNodeOptions);
             }
         });
 
-        // Inicia a conversa
         loadNode('inicio');
     });
 </script>
