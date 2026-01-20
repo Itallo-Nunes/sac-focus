@@ -1,18 +1,15 @@
 
 import os
 import json
-# CORREÇÃO FINAL: O nome do pacote a ser importado é google.generativeai
 import google.generativeai as genai
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import current_user
 from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 
 chatbot_bp = Blueprint('chatbot', __name__)
 
-# --- Carregamento da Base de Conhecimento (FAQ) ---
 faq_data = {}
 try:
     with open('faq.json', 'r', encoding='utf-8') as f:
@@ -23,8 +20,6 @@ except FileNotFoundError:
 except json.JSONDecodeError:
     print("\033[91mErro: Falha ao decodificar o arquivo faq.json. Verifique a formatação.\033[0m")
 
-
-# --- Configuração da IA Generativa do Google ---
 API_KEY = os.getenv("GEMINI_API_KEY")
 model = None
 
@@ -32,58 +27,40 @@ if not API_KEY:
     print("\033[91mAviso: A variável de ambiente GEMINI_API_KEY não foi definida.\033[0m")
 else:
     try:
-        # CORREÇÃO FINAL: Usar o configure, que é o correto para esta versão da lib
         genai.configure(api_key=API_KEY)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.0-pro')
         print("\033[92mModelo Generative AI configurado com sucesso.\033[0m")
     except Exception as e:
         print(f"\033[91mErro Crítico ao configurar o modelo Generative AI: {e}\033[0m")
         model = None
 
-# --- Lógica do Chatbot ---
-
 def find_in_faq(user_message):
-    """Busca uma resposta na base de conhecimento (FAQ)."""
     if not faq_data:
         return None
-
     user_words = set(user_message.lower().split())
     best_match = None
     max_match_count = 0
-
     for item in faq_data:
         question_words = set(item['pergunta'].lower().split())
         match_count = len(user_words.intersection(question_words))
-
         if match_count > max_match_count:
             max_match_count = match_count
             best_match = item['resposta']
-    
     if max_match_count > 1:
         return best_match
-        
     return None
 
-# Dicionário em memória para históricos de chat
 chat_histories = {}
 
 def get_chatbot_response(user_id, user_message):
-    """
-    Obtém uma resposta para o usuário, primeiro consultando o FAQ
-    e depois a IA Generativa se necessário.
-    """
     faq_answer = find_in_faq(user_message)
     if faq_answer:
         return faq_answer
-
     if not model:
         return "Desculpe, não encontrei uma resposta na nossa base de conhecimento e o serviço de IA não está disponível no momento."
-
     if user_id not in chat_histories:
         chat_histories[user_id] = model.start_chat(history=[])
-    
     chat_session = chat_histories[user_id]
-
     try:
         contextual_prompt = f"""
         Você é um assistente virtual de atendimento da empresa SACFocus.
@@ -99,34 +76,24 @@ def get_chatbot_response(user_id, user_message):
         print(f"\033[91mErro ao se comunicar com a API do Gemini: {e}\033[0m")
         return "Desculpe, ocorreu um erro ao processar sua solicitação. Tente mais tarde."
 
-# --- Rotas do Blueprint ---
-
 @chatbot_bp.route('/')
 def chat_page():
-    """Exibe a página de chat."""
     chatbot_enabled = API_KEY is not None
     return render_template('chatbot.html', chatbot_enabled=chatbot_enabled)
 
-
 @chatbot_bp.route('/ask', methods=['POST'])
 def ask():
-    """Lida com as perguntas enviadas pelo chatbot no frontend."""
     if not API_KEY:
         return jsonify({'answer': "Desculpe, o serviço de chatbot não está ativado no momento."}), 503
-
     if current_user.is_authenticated and current_user.is_attendant:
         return jsonify({'answer': "A funcionalidade de chatbot não se aplica a atendentes."}), 403
-
     data = request.get_json()
     if not data or 'question' not in data:
         return jsonify({'error': 'A pergunta (question) é obrigatória.'}), 400
-
     user_message = data['question']
-    
     if current_user.is_authenticated:
         user_id = f"user_{current_user.id}"
     else:
         user_id = f"session_{request.cookies.get('session', 'anonymous')}"
-
     bot_response = get_chatbot_response(user_id, user_message)
     return jsonify({'answer': bot_response})

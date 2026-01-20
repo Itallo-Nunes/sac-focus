@@ -27,6 +27,9 @@ def create_app():
     # --- Configuração do LoginManager ---
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
+    # TRADUÇÃO: Mensagem para usuários não logados que tentam acessar páginas protegidas.
+    login_manager.login_message = "Por favor, faça o login para acessar esta página."
+    login_manager.login_message_category = "info" # Categoria da mensagem flash (opcional, mas bom para estilização)
     login_manager.init_app(app)
 
     # --- FILTRO JINJA2 PERSONALIZADO (nl2br) ---
