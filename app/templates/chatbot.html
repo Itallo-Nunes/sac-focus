@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Chatbot - SAC Focus{% endblock %}
+{% block title %}Assistente Virtual - SAC Focus{% endblock %}
 
 {% block content %}
 <style>
@@ -22,14 +22,33 @@
         word-wrap: break-word;
     }
     .user-message {
-        background-color: #0056b3; /* Azul escuro */
+        background-color: #0056b3;
         color: white;
         align-self: flex-end;
     }
     .bot-message {
-        background-color: #e9ecef; /* Cinza claro */
+        background-color: #e9ecef;
         color: #343a40;
         align-self: flex-start;
+    }
+    #chat-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: flex-start;
+        margin-bottom: 1rem;
+    }
+    .option-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .option-button:hover {
+        background-color: #0056b3;
     }
     #chat-form {
         display: flex;
@@ -40,64 +59,135 @@
     }
 </style>
 
-<h2>Converse com nosso Assistente Virtual</h2>
-<p>Faça uma pergunta para obter ajuda instantânea. Digite "contato" para saber como abrir um chamado.</p>
+<h2>Assistente Virtual</h2>
+<p>Digite sua dúvida ou selecione uma das opções sugeridas.</p>
 
 <div id="chat-window" class="chat-window"></div>
 
+<!-- Container para os botões de sugestão -->
+<div id="chat-options"></div>
+
+<!-- Formulário de texto re-introduzido -->
 <form id="chat-form">
-    <input type="text" id="chat-input" placeholder="Digite sua mensagem..." required autocomplete="off">
+    <input type="text" id="chat-input" class="form-control" placeholder="Digite sua mensagem..." required autocomplete="off">
     <button type="submit" class="btn btn-primary">Enviar</button>
 </form>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const chatWindow = document.getElementById('chat-window');
+        const chatOptionsContainer = document.getElementById('chat-options');
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
 
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const userMessage = chatInput.value;
-            if (!userMessage) return;
+        // Guarda o estado das opções do nó atual da conversa
+        let currentNodeOptions = [];
 
-            // Display user message
-            appendMessage(userMessage, 'user');
-            chatInput.value = '';
-
-            try {
-                // Send message to the backend
-                const response = await fetch('{{ url_for("chatbot.ask") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ question: userMessage }),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                const botMessage = data.answer;
-
-                // Display bot response
-                appendMessage(botMessage, 'bot');
-
-            } catch (error) {
-                console.error('Fetch error:', error);
-                appendMessage('Desculpe, ocorreu um erro de conexão.', 'bot');
-            }
-        });
-
+        // Adiciona uma mensagem na janela de chat
         function appendMessage(message, sender) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('chat-message', sender + '-message');
-            messageElement.innerText = message;
+            messageElement.innerHTML = message.replace(/\n/g, '<br>');
             chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         }
+
+        // Lida com a seleção de uma opção (seja por clique ou submissão do texto)
+        function handleOptionSelection(option) {
+            appendMessage(option.texto, 'user');
+            chatInput.value = ''; // Limpa o campo de texto
+            
+            if (option.resposta) {
+                appendMessage(option.resposta, 'bot');
+                // Após uma resposta final, volta ao início para um novo fluxo
+                loadNode('inicio');
+            } else if (option.proximo_no) {
+                // Carrega o próximo passo da conversa
+                loadNode(option.proximo_no);
+            }
+        }
+        
+        // Renderiza os botões de opção
+        function displayOptions(options) {
+            chatOptionsContainer.innerHTML = ''; // Limpa opções antigas
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = option.texto;
+                button.addEventListener('click', () => {
+                    handleOptionSelection(option);
+                });
+                chatOptionsContainer.appendChild(button);
+            });
+        }
+
+        // Carrega um nó da árvore de conversa
+        async function loadNode(nodeId) {
+            try {
+                const response = await fetch('{{ url_for("chatbot.flow") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ node: nodeId }),
+                });
+
+                if (!response.ok) throw new Error('Network response error');
+
+                const node = await response.json();
+
+                if (node.mensagem) {
+                    appendMessage(node.mensagem, 'bot');
+                }
+
+                if (node.opcoes) {
+                    currentNodeOptions = node.opcoes;
+                    displayOptions(currentNodeOptions);
+                } else {
+                    currentNodeOptions = [];
+                    displayOptions([]);
+                }
+
+            } catch (error) {
+                console.error('Flow error:', error);
+                appendMessage('Desculpe, ocorreu um erro de conexão.', 'bot');
+            }
+        }
+
+        // Filtra as opções visíveis conforme o usuário digita
+        chatInput.addEventListener('input', () => {
+            const inputText = chatInput.value.toLowerCase();
+            if (!inputText) {
+                displayOptions(currentNodeOptions);
+                return;
+            }
+            const filteredOptions = currentNodeOptions.filter(opt => 
+                opt.texto.toLowerCase().includes(inputText)
+            );
+            displayOptions(filteredOptions);
+        });
+
+        // Lida com a submissão do formulário (pressionando Enter ou clicando em Enviar)
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputText = chatInput.value;
+            if (!inputText) return;
+
+            // Verifica se o texto digitado corresponde exatamente a uma das opções atuais
+            const exactMatch = currentNodeOptions.find(opt => 
+                opt.texto.toLowerCase() === inputText.toLowerCase()
+            );
+
+            if (exactMatch) {
+                handleOptionSelection(exactMatch);
+            } else {
+                // Se não houver correspondência exata, envia uma mensagem de ajuda
+                appendMessage(inputText, 'user');
+                appendMessage('Não entendi. Por favor, escolha uma das opções sugeridas.', 'bot');
+                displayOptions(currentNodeOptions); // Re-exibe as opções originais
+            }
+        });
+
+        // Inicia a conversa
+        loadNode('inicio');
     });
 </script>
 {% endblock %}

@@ -1,0 +1,35 @@
+{
+  "inicio": {
+    "mensagem": "Olá! Sou o assistente virtual da SACFocus. Como posso ajudar?",
+    "opcoes": [
+      { "texto": "Dúvidas sobre a ferramenta", "proximo_no": "sobre_ferramenta" },
+      { "texto": "Gerenciamento de chamados", "proximo_no": "sobre_chamados" },
+      { "texto": "Problemas com a minha conta", "proximo_no": "sobre_conta" }
+    ]
+  },
+  "sobre_ferramenta": {
+    "mensagem": "Entendido. O que você gostaria de saber sobre a ferramenta?",
+    "opcoes": [
+      { "texto": "Como criar um novo atendente?", "resposta": "Para criar um novo atendente, vá para o painel de administração, clique em 'Usuários' e depois em 'Adicionar Novo'. Preencha os dados e selecione o perfil 'Atendente'." },
+      { "texto": "Onde vejo os relatórios?", "resposta": "Os relatórios de desempenho e estatísticas estão disponíveis na seção 'Relatórios' no menu principal." },
+      { "texto": "Voltar", "proximo_no": "inicio" }
+    ]
+  },
+  "sobre_chamados": {
+    "mensagem": "Certo, vamos falar sobre chamados. Qual é a sua dúvida?",
+    "opcoes": [
+      { "texto": "Como atribuir um chamado a mim?", "resposta": "Dentro de um chamado que não foi atribuído, clique no botão 'Assumir chamado' ou 'Atribuir a mim'." },
+      { "texto": "Como fechar um chamado?", "resposta": "Após resolver a questão do cliente, adicione uma nota final com a solução e altere o status do chamado para 'Fechado' ou 'Resolvido'." },
+      { "texto": "Onde o cliente vê a resposta?", "resposta": "O cliente é notificado por e-mail e também pode ver todo o histórico da conversa na tela de visualização do chamado em seu portal." },
+      { "texto": "Voltar", "proximo_no": "inicio" }
+    ]
+  },
+  "sobre_conta": {
+    "mensagem": "Sem problemas. Qual a questão com a sua conta?",
+    "opcoes": [
+      { "texto": "Esqueci minha senha", "resposta": "Na página de login, clique em 'Esqueci minha senha' e siga as instruções para criar uma nova." },
+      { "texto": "Alterar meu e-mail", "resposta": "A alteração de e-mail deve ser solicitada ao administrador do sistema para garantir a segurança." },
+      { "texto": "Voltar", "proximo_no": "inicio" }
+    ]
+  }
+}
