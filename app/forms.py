@@ -25,10 +25,12 @@ class TicketForm(FlaskForm):
     priority = SelectField('Prioridade', choices=[('Baixa', 'Baixa'), ('Média', 'Média'), ('Alta', 'Alta')], validators=[DataRequired()])
     submit = SubmitField('Abrir Chamado')
 
+# Formulário para Adicionar um Comentário (CORRIGIDO)
 class CommentForm(FlaskForm):
     text = TextAreaField('Comentário', validators=[DataRequired(message="O campo de comentário não pode estar vazio.")])
-    submit_comment = SubmitField('Adicionar Comentário')
+    submit_comment = SubmitField('Adicionar Comentário') # Nome corrigido
 
+# Formulário para Atualizar o Status de um Ticket (CORRIGIDO)
 class UpdateStatusForm(FlaskForm):
     status = SelectField('Novo Status', 
         choices=[
@@ -39,4 +41,4 @@ class UpdateStatusForm(FlaskForm):
         ],
         validators=[DataRequired()]
     )
-    submit_status = SubmitField('Atualizar Status')
+    submit_status = SubmitField('Atualizar Status') # Nome corrigido
